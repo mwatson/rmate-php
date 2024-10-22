@@ -1,0 +1,9 @@
+File -w is not writable! Use -f or --force to open anyway.
+File -w is not writable! Use -f or --force to open anyway.
+File -w is not writable! Use -f or --force to open anyway.
+File -w is not writable! Use -f or --force to open anyway.
+File -w is not writable! Use -f or --force to open anyway.
+Using TCP socket to connect: 'localhost:52698'
+Connect: 'Sublime Text 3 (remote_subl plugin)'
+Closed testfile.txt
+Received unknown command "", exiting.

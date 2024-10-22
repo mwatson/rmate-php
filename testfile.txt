@@ -1,6 +1,5 @@
-This is a test file. For testing.
+You loaded the test file!
 
-Test
+Did you know that this is a test file? It's for testing.
 
-Okay?
-
+It's not super useful for anything else really.

@@ -1,0 +1,17 @@
+{
+    "name": "mwatson/rmate-php",
+    "type": "project",
+    "description": "A hasty port of rmate to PHP.",
+    "require": {
+        "php": ">=8.3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rmate\\": "src/",
+            "Rmate\\Tests\\": "tests/src"
+        }
+    }
+}

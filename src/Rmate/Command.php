@@ -25,8 +25,12 @@ class Command {
     }
 
     public function read_stdin() {
-        $this->data = fopen("stdin://", "");
-        $this->size = strlen($this->data) * 8;
+        $fp = fopen("php://stdin", "r");
+        while (!feof($fp)) {
+            $this->data .= fgets($fp);
+        }
+        fclose($fp);
+        $this->size = strlen($this->data);
     }
 
     public function send($socket) {
