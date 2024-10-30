@@ -8,23 +8,42 @@ class Command {
     protected $data;
     protected $size;
 
-    public function __construct($name) {
+    /**
+     * @param  string $name
+     */
+    public function __construct(string $name) {
         $this->command = $name;
         $this->variables = [];
         $this->data = null;
         $this->size = null;
     }
 
-    public function __set($name, $value) {
+    /**
+     * @param  string $name
+     * @param  mixed $value
+     */
+    public function __set($name, $value) 
+    {
         $this->variables[$name] = $value;
     }
 
-    public function read_file($path) {
+    /**
+     * Read a file into memory
+     * @param  string $path
+     * @return void
+     */
+    public function readFile($path) : void
+    {
         $this->size = filesize($path);
         $this->data = file_get_contents($path);
     }
 
-    public function read_stdin() {
+    /**
+     * Read from stdin until eof (^D)
+     * @return void
+     */
+    public function readStdin() : void
+    {
         $fp = fopen("php://stdin", "r");
         while (!feof($fp)) {
             $this->data .= fgets($fp);
@@ -33,20 +52,26 @@ class Command {
         $this->size = strlen($this->data);
     }
 
-    public function send($socket) {
-        fsockwrite($socket, $this->command);
+    /**
+     * Send data
+     * @param  Connection $connection
+     * @return void
+     */
+    public function send(Connection $connection) : void
+    {
+        $connection->write($this->command);
         foreach ($this->variables as $name => $value) {
             if ($value === true) {
                 $value = 'yes';
             }
             $name = str_replace('_', '-', $name);
-            fsockwrite($socket, "{$name}:{$value}");
+            $connection->write("{$name}:{$value}");
         }
         if ($this->data) {
-            fsockwrite($socket, "data:{$this->size}");
-            fsockwrite($socket, $this->data);
+            $connection->write("data:{$this->size}");
+            $connection->write($this->data);
         }
         
-        fsockwrite($socket, "");
+        $connection->write("");
     }
 }

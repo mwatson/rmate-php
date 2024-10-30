@@ -12,7 +12,7 @@ Also I wanted to be able to quickly remote edit files with Sublime Text because 
 
 This was primarily tested with [RemoteSubl](https://github.com/randy3k/RemoteSubl) which is the most recently maintained fork of rsub as far as I can tell. So I would recommend installing RemoteSubl if you want to be able to use this functionality.
 
-You also need PHP CLI on your remote server.
+You also need the PHP CLI on your remote server and [Composer](https://getcomposer.org).
 
 ## Installation
 
@@ -36,6 +36,8 @@ After that check out this repo on your remote server (put it anywhere you want):
 git clone git@github.com:mwatson/rmate-php.git
 ```
 
+Then run `composer install` which will build everything needed. You can optionally not use composer, as there is an extremely simple autoloader included.
+
 ## Running / Editing
 
 It can be run by calling the `cli/rmate.php` file:
@@ -47,7 +49,7 @@ php cli/rmate.php ../path/to/file_to_edit.php
 I recommend adding an alias to your shell's `.*rc` or `.*profile`:
 
 ```
-alias rmate="php /full/path/to/rmate-php/src/rmate.php"
+alias rmate="php /full/path/to/rmate-php/cli/rmate.php"
 ```
 
 Once that's done you can load a remote file in Sublime via:
@@ -81,3 +83,10 @@ There are various command line options you can use:
     --version               Show version.
 ```
 
+## Development / Tests
+
+You can run the tests with the following:
+
+```
+vendor/bin/phpunit --bootstrap cli/bootstrap.php tests/
+```

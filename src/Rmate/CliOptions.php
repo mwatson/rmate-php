@@ -4,23 +4,17 @@ namespace Rmate;
 
 class CliOptions
 {
-    /**
-     */
     protected $options;
 
-    /**
-     */
     protected $cliArgs;
 
-    // this replicates some defaults
     protected $defaults = [
-        'host' => 'localhost',
-        'port' => 52698,
-        'unixsocket' => '~/.rmate.socket',
+        'host' => DEFAULT_HOST,
+        'port' => DEFAULT_PORT,
+        'unixsocket' => DEFAULT_SOCKET,
     ];
 
     /**
-     * The constructor
      * @param array $cliArgs
      */
     public function __construct(array $cliArgs)
@@ -205,6 +199,7 @@ class CliOptions
     }
 
     /**
+     * @return array
      */
     public function getCliArgs() : array
     {
@@ -212,9 +207,12 @@ class CliOptions
     }
 
     /**
+     * @param  Settings $settings
+     * @return array
      */
     public function parseCliOptions(Settings $settings) : array
     {
+        $i = 0;
         foreach ($this->cliArgs as $i => $arg) {
             $opt = [];
             if (strpos($arg, '--') === 0) {
@@ -248,11 +246,14 @@ class CliOptions
     }
 
     /**
+     * @param  string $search
+     * @param  string $type
+     * @return array
      */
-    public function retrieveCliOption($search, $type) : array
+    protected function retrieveCliOption(string $search, $type) : array
     {
         foreach ($this->options as $option) {
-            if ($option[$type] == $search) {
+            if (strlen($option[$type]) && strpos($search, $option[$type]) === 0) {
                 return $option;
             }
         }

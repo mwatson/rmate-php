@@ -3,14 +3,7 @@
 // this is a really rough PHP port of Rmate:
 // https://github.com/textmate/rmate/blob/master/bin/rmate
 
-define('DATE', "2021-04-26");
-define('VERSION', "1.5.10");
-define('VERSION_STRING', "rmate-php version " . VERSION . " (" . DATE . ")");
-
-include(__DIR__ . "/../src/Rmate/Rmate.php");
-include(__DIR__ . "/../src/Rmate/CliOptions.php");
-include(__DIR__ . "/../src/Rmate/Settings.php");
-include(__DIR__ . "/../src/Rmate/Command.php");
+include(__DIR__ . "/bootstrap.php");
 
 if (realpathext($argv[0]) == realpath($_SERVER['PHP_SELF'] ?? '')) {
     array_shift($argv);
@@ -20,6 +13,12 @@ $settings = new \Rmate\Settings();
 $cliOpts = new \Rmate\CliOptions($argv);
 
 $argv = $cliOpts->parseCliOptions($settings);
+
+if (empty($argv)) {
+    echo "Usage: rmate [OPTIONS] filename\n";
+    echo "See rmate --help for more\n";
+    die(0);
+}
 
 // Parse arguments.
 $cmds = [];
@@ -69,10 +68,10 @@ foreach ($argv as $idx => $path) {
     }
     if ($path == '-') {
         // read from stdin
-        $cmd->read_stdin();
+        $cmd->readStdin();
     }
     if ($path != '-' && file_exists($path)) {
-        $cmd->read_file($path);
+        $cmd->readFile($path);
     }
     if($path != '-' && !file_exists($path)) {
         $cmd->data = "0";
@@ -81,11 +80,13 @@ foreach ($argv as $idx => $path) {
     $cmds[] = $cmd;
 }
 
-$rmate = new \Rmate\Rmate($settings);
+$connection = new \Rmate\Connection($settings->host, $settings->port, $settings->unixsocket);
+$handler = new \Rmate\CommandHandler($connection);
+$handler->setVerbose($settings->verbose);
 
 if ($settings->wait) {
     // run synchronously
-    $rmate->connectAndHandleCmds($settings->host, $settings->port, $settings->unixsocket, $cmds);
+    $handler->connectAndHandleCmds($cmds);
 } else {
     // run async, which is really annoying in PHP
     $cliArgs = $cliOpts->getCliArgs();
@@ -95,18 +96,7 @@ if ($settings->wait) {
     $rmate = __FILE__;
 
     $out = [];
-    exec("php {$rmate} {$cliArgs} 2>&1 & echo $!", $out);
+    exec("php {$rmate} {$cliArgs} >> /dev/null 2>&1 & echo $!", $out);
     $pid = (int) $out[0];
     echo "rmate PID: {$pid}\n";
-}
-
-// wrapper for if you need to debug calls to fwrite
-function fsockwrite($fp, mixed $value) {
-    //echo "SENDING {$value}\n";
-    fwrite($fp, "{$value}\n");
-}
-
-// realpath that also expands ~
-function realpathext(string $path) {
-    return realpath(str_replace('~', getenv('HOME'), $path));
 }

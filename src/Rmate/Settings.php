@@ -2,7 +2,8 @@
 
 namespace Rmate;
 
-class Settings {
+class Settings
+{
     public $host;
     public $port;
     public $unixsocket;
@@ -14,10 +15,13 @@ class Settings {
     public $types;
     public $reactivate;
 
-    public function __construct() {
-        $this->host       = 'localhost';
-        $this->port       = 52698;
-        $this->unixsocket = '~/.rmate.socket';
+    /**
+     */
+    public function __construct()
+    {
+        $this->host       = DEFAULT_HOST;
+        $this->port       = DEFAULT_PORT;
+        $this->unixsocket = DEFAULT_SOCKET;
 
         $this->wait       = false;
         $this->force      = false;
@@ -27,7 +31,7 @@ class Settings {
         $this->names      = [];
         $this->types      = [];
 
-        $this->read_disk_settings();
+        $this->readDiskSettings();
 
         if (getenv('RMATE_HOST')) {
             $this->host = strval(getenv('RMATE_HOST'));
@@ -40,11 +44,15 @@ class Settings {
         }
 
         if ($this->host == 'auto') {
-            $this->host = $this->parse_ssh_connection();
+            $this->host = $this->parseSshConnection();
         }
     }
 
-    protected function read_disk_settings() {
+    /**
+     * @return void
+     */
+    protected function readDiskSettings() : void
+    {
         foreach ([ "/etc/rmate.rc", "/usr/local/etc/rmate.rc", "~/.rmate.rc"] as $current_file) {
             $file = realpathext($current_file);
             if (file_exists($file)) {
@@ -57,7 +65,11 @@ class Settings {
         }
     }
 
-    public function parse_ssh_connection() {
-      return getenv('SSH_CONNECTION') ? reset(explode(' ', getenv('SSH_CONNECTION'))) : 'localhost';
+    /**
+     * @return string
+     */
+    protected function parseSshConnection()
+    {
+        return getenv('SSH_CONNECTION') ? reset(explode(' ', getenv('SSH_CONNECTION'))) : DEFAULT_HOST;
     }
 }

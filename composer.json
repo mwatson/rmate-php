@@ -10,8 +10,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Rmate\\": "src/",
-            "Rmate\\Tests\\": "tests/src"
+            "Rmate\\": "src/Rmate",
+            "Rmate\\Tests\\": "tests/src/Rmate"
         }
     }
 }
