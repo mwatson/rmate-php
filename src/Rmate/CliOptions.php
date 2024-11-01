@@ -6,8 +6,6 @@ class CliOptions
 {
     protected $options;
 
-    protected $cliArgs;
-
     protected $defaults = [
         'host' => DEFAULT_HOST,
         'port' => DEFAULT_PORT,
@@ -17,10 +15,8 @@ class CliOptions
     /**
      * @param array $cliArgs
      */
-    public function __construct(array $cliArgs)
+    public function __construct(protected array $cliArgs)
     {
-        $this->cliArgs = $cliArgs;
-
         $this->options = [
             [
                 'option' => 'host',
@@ -155,7 +151,7 @@ class CliOptions
                 'description' => [
                     "Show this message.",
                 ],
-                'cb' => function(Settings $settings, array $options) {
+                'cb' => function(Settings $settings, Output $output, array $options) {
                     $maxLen = 0;
                     foreach ($options as $option) {
                         $len = strlen($option['val_display']) + strlen($option['option']) + 3;
@@ -165,21 +161,20 @@ class CliOptions
                     }
                     foreach ($options as $option) {
                         if ($option['short']) {
-                            echo "-{$option['short']}, ";
+                            $output->add("-{$option['short']}, ");
                         } else {
-                            echo "    ";
+                            $output->add("    ");
                         }
 
                         $optStr = "--{$option['option']}";
                         if (!empty($option['val_display'])) {
                             $optStr .= "={$option['val_display']}";
                         }
-                        echo str_pad($optStr, $maxLen + 2, ' ', STR_PAD_RIGHT);
-                        echo ' ';
-                        echo implode(' ', $option['description']);
-                        echo "\n";
+                        $output
+                            ->add(str_pad($optStr, $maxLen + 2, ' ', STR_PAD_RIGHT))
+                            ->add(' ')
+                            ->addLine(implode(' ', $option['description']));
                     }
-                    exit;
                 },
             ],
             [
@@ -190,9 +185,8 @@ class CliOptions
                 'description' => [
                     "Show version.",
                 ],
-                'cb' => function(Settings $settings, array $options) {
-                    echo VERSION_STRING . "\n";
-                    exit;
+                'cb' => function(Settings $settings, Output $output, array $options) {
+                    $output->addLine(VERSION_STRING);
                 },
             ],
         ];
@@ -210,7 +204,7 @@ class CliOptions
      * @param  Settings $settings
      * @return array
      */
-    public function parseCliOptions(Settings $settings) : array
+    public function parseCliOptions(Settings $settings, Output $output) : array
     {
         $i = 0;
         foreach ($this->cliArgs as $i => $arg) {
@@ -225,7 +219,7 @@ class CliOptions
             }
 
             if (empty($opt)) {
-                echo "Unknown option '{$arg}'\n";
+                $output->addLine("Unknown option '{$arg}'")->flush();
                 die;
             }
 
@@ -236,7 +230,9 @@ class CliOptions
             } else if ($opt['type'] == 'flag') {
                 $opt['cb']($settings);
             } else if ($opt['type'] == 'info') {
-                $opt['cb']($settings, $this->options);
+                $opt['cb']($settings, $output, $this->options);
+                $output->flush();
+                exit(0);
             }
         }
 

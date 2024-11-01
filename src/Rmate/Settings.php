@@ -17,7 +17,7 @@ class Settings
 
     /**
      */
-    public function __construct()
+    public function __construct(array $configPaths = [])
     {
         $this->host       = DEFAULT_HOST;
         $this->port       = DEFAULT_PORT;
@@ -31,7 +31,7 @@ class Settings
         $this->names      = [];
         $this->types      = [];
 
-        $this->readDiskSettings();
+        $this->readDiskSettings($configPaths);
 
         if (getenv('RMATE_HOST')) {
             $this->host = strval(getenv('RMATE_HOST'));
@@ -51,10 +51,10 @@ class Settings
     /**
      * @return void
      */
-    protected function readDiskSettings() : void
+    protected function readDiskSettings(array $configPaths) : void
     {
-        foreach ([ "/etc/rmate.rc", "/usr/local/etc/rmate.rc", "~/.rmate.rc"] as $current_file) {
-            $file = realpathext($current_file);
+        foreach ($configPaths as $current_file) {
+            $file = RealPath::get($current_file);
             if (file_exists($file)) {
                 // using JSON configs since it's built into PHP
                 $params = json_decode(file_get_contents($file), true);

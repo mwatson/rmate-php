@@ -4,16 +4,16 @@ namespace Rmate;
 
 class CommandHandler
 {
-    protected $connection;
-
     protected $verbose = false;
 
     /**
      * @param  Connection $connection
+     * @param  Output $output
      */
-    public function __construct(Connection $connection)
-    {
-        $this->connection = $connection;
+    public function __construct(
+        protected Connection $connection,
+        protected Output $output
+    ) {
     }
 
     /**
@@ -33,20 +33,24 @@ class CommandHandler
     public function connectAndHandleCmds(array $cmds) : void
     {
         if ($this->verbose) {
-            echo sprintf(
-                "Using %s socket to connect: '%s'\n",
+            $this->output->addLine(sprintf(
+                "Using %s socket to connect: '%s'",
                 $this->connection->getType(),
                 $this->connection->getConnectAddr()
-            );
+            ));
         }
 
-        if (!$this->connection->connect()) {
-            die;
+        try {
+            $this->connection->connect();
+        } catch (\Exception $e) {
+            $this->output->addLine($e->getMessage())->flush();
+            // TODO: handle exit elsewhere
+            exit;
         }
 
         $serverInfo = trim($this->connection->nextLine());
         if ($this->verbose) {
-            echo "Connect: '{$serverInfo}'\n";
+            $this->output->addLine("Connect: '{$serverInfo}'")->flush();
         }
 
         foreach ($cmds as $cmd) {
@@ -59,8 +63,10 @@ class CommandHandler
         }
         $this->connection->close();
         if ($this->verbose) {
-            echo "Done\n";
+            $this->output->addLine("Done");
         }
+
+        $this->output->flush();
     }
 
     /**
@@ -101,8 +107,9 @@ class CommandHandler
                 $this->handleClose($variables, $data);
                 break;
             default:
-                echo "Received unknown command '{$cmd}', exiting.\n";
-                die;
+                $this->output->addLine("Received unknown command '{$cmd}', exiting.")->flush();
+                // TODO: handle exit elsewhere
+                exit;
         }
     }
 
@@ -116,7 +123,7 @@ class CommandHandler
         $path = $variables['token'] ?? "";
         if (is_writable($path) || !file_exists($path)) {
             if ($this->verbose) {
-                echo "Saving {$path}\n";
+                $this->output->addLine("Saving {$path}");
             }
 
             $backup_path = "{$path}~";
@@ -126,7 +133,9 @@ class CommandHandler
             if (file_exists($path)) {
                 copy($path, $backup_path);
             }
-            $saved = file_put_contents($path, $data);
+            //$saved = file_put_contents($path, $data);
+            $fp = fopen($path, 'w');
+            $saved = fwrite($fp, $data);
             if (file_exists($backup_path)) {
                 unlink($backup_path);
             }
@@ -134,14 +143,16 @@ class CommandHandler
             if ($saved === false) {
                 // TODO We probably want some way to notify the server app that the save failed
                 if ($this->verbose) {
-                    echo "Save failed! {$e->getMessage()}\n";
+                    $this->output->addLine("Save failed! {$e->getMessage()}");
                 }
             }
         } else {
             if ($this->verbose) {
-                echo "Skipping save, file not writable.\n";
+                $this->output->addLine("Skipping save, file not writable.");
             }
         }
+
+        $this->output->flush();
     }
 
     /**
@@ -153,7 +164,7 @@ class CommandHandler
     {
         $path = $variables['token'] ?? "";
         if ($this->verbose) {
-            echo "Closed {$path}\n";
+            $this->output->addLine("Closed {$path}")->flush();
         }
     }
 }

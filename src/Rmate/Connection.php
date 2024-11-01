@@ -21,7 +21,7 @@ class Connection
         string $unixSocketPath = ''
     ) {
         if (!empty($unixSocketPath)) {
-            $unixSocketPath = realpathext($unixSocketPath);
+            $unixSocketPath = RealPath::get($unixSocketPath);
         }
 
         if (empty($unixSocketPath) || !file_exists($unixSocketPath)) {
@@ -29,7 +29,7 @@ class Connection
             $this->connectAddr = "{$host}:{$port}";
         } else {
             $this->type = 'UNIX';
-            $$this->connectAddr = $unixSocketPath;
+            $this->connectAddr = $unixSocketPath;
         }
     }
 
@@ -50,9 +50,9 @@ class Connection
     }
 
     /**
-     * @return bool
+     * @return void
      */
-    public function connect() : bool
+    public function connect() : void
     {
         $errno = null;
         $errstr = null;
@@ -60,11 +60,8 @@ class Connection
         $this->socket = stream_socket_client($fullAddr, $errno, $errstr);
 
         if (!$this->socket) {
-            echo "Error connecting '{$this->connectAddr}': [{$errno}] {$errstr}\n";
-            return false;
+            throw new \Exception("Error connecting '{$this->connectAddr}': [{$errno}] {$errstr}");
         }
-
-        return true;
     }
 
     /**

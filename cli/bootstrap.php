@@ -21,13 +21,3 @@ if (file_exists($composerAutoload)) {
         }
     });
 }
-
-/**
- * realpath that also expands ~
- * @param  string $path
- * @return string
- */
-function realpathext(string $path) : string
-{
-    return realpath(str_replace('~', getenv('HOME'), $path));
-}

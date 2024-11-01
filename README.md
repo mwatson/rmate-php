@@ -36,7 +36,7 @@ After that check out this repo on your remote server (put it anywhere you want):
 git clone git@github.com:mwatson/rmate-php.git
 ```
 
-Then run `composer install` which will build everything needed. You can optionally not use composer, as there is an extremely simple autoloader included.
+You can also run `composer install` which will build everything needed. This step isn't necessary unless you want to run the tests, as the code includes a very simple autoloader.
 
 ## Running / Editing
 
@@ -52,7 +52,9 @@ I recommend adding an alias to your shell's `.*rc` or `.*profile`:
 alias rmate="php /full/path/to/rmate-php/cli/rmate.php"
 ```
 
-Once that's done you can load a remote file in Sublime via:
+You can generate this easily with `make alias`.
+
+Once the alias is added you can load a remote file in Sublime via:
 
 ```
 rmate ../path/to/file_to_edit.php
@@ -85,8 +87,8 @@ There are various command line options you can use:
 
 ## Development / Tests
 
-You can run the tests with the following:
+You can run the tests with the following (make sure you `composer install`):
 
 ```
-vendor/bin/phpunit --bootstrap cli/bootstrap.php tests/
+make tests
 ```
