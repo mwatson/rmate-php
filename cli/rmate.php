@@ -12,10 +12,23 @@ if (\Rmate\RealPath::get($argv[0]) == \Rmate\RealPath::get($_SERVER['PHP_SELF'] 
     array_shift($argv);
 }
 
+$output = new \Rmate\Output();
+
+$cliOptions = new \Rmate\CliOptions($argv);
+
+$settings = new \Rmate\Settings([ "/etc/rmate.rc", "/usr/local/etc/rmate.rc", "~/.rmate.rc" ]);
+
+$cliOptions->parseCliOptions($settings, $output);
+
 $rmate = new \Rmate\Rmate(
-    new \Rmate\Settings([ "/etc/rmate.rc", "/usr/local/etc/rmate.rc", "~/.rmate.rc" ]),
-    new \Rmate\CliOptions($argv),
-    new \Rmate\Output(),
+    $settings,
+    $output,
+    new \Rmate\Connection(
+        $settings->host,
+        $settings->port,
+        $settings->unixsocket
+    ),
+    $cliOptions,
     __FILE__
 );
 

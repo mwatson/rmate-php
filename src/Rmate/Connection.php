@@ -78,6 +78,9 @@ class Connection
      */
     public function read(int $length) : string|bool
     {
+        if ($length <= 0) {
+            return false;
+        }
         return fread($this->socket, $length);
     }
 

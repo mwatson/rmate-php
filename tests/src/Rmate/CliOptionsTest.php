@@ -14,9 +14,9 @@ class CliOptionsTest extends TestCase
         $settings = new Rmate\Settings();
         $output = new Rmate\Output();
 
-        $remainingArgs = $cliOpts->parseCliOptions($settings, $output);
+        $cliOpts->parseCliOptions($settings, $output);
 
-        $this->assertEquals([ '-' ], $remainingArgs);
+        $this->assertEquals([ '-' ], $cliOpts->getUnprocessedCliArgs());
         $this->assertEquals('testhost', $settings->host);
     }
 
@@ -26,9 +26,9 @@ class CliOptionsTest extends TestCase
         $settings = new Rmate\Settings();
         $output = new Rmate\Output();
 
-        $remainingArgs = $cliOpts->parseCliOptions($settings, $output);
+        $cliOpts->parseCliOptions($settings, $output);
 
-        $this->assertEquals([ '-' ], $remainingArgs);
+        $this->assertEquals([ '-' ], $cliOpts->getUnprocessedCliArgs());
         $this->assertTrue($settings->wait);
     }
 }

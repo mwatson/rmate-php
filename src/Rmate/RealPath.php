@@ -2,7 +2,7 @@
 
 namespace Rmate;
 
-// this exists entirely as a way to override realpath for testing, I'm sorry
+// this exists entirely as a way to override realpath() for testing, I'm sorry
 
 class RealPath
 {
@@ -22,6 +22,7 @@ class RealPath
     }
 
     /**
+     * Realpath + replace ~ with user's $HOME
      * @param  string $relPath
      * @return string
      */

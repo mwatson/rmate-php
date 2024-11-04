@@ -25,7 +25,7 @@ class Settings
 
         $this->wait       = false;
         $this->force      = false;
-        $this->verbose    = true;
+        $this->verbose    = false;
         $this->reactivate = true;
         $this->lines      = [];
         $this->names      = [];

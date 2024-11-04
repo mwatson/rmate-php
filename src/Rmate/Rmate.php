@@ -5,16 +5,20 @@ namespace Rmate;
 class Rmate
 {
     /**
+     * @param  Settings $settings
+     * @param  Output $output
+     * @param  Connection $connection
+     * @param  CliOptions $cliOptions
+     * @param  string $cliFilePath
      */
     public function __construct(
         protected Settings $settings,
-        protected CliOptions $cliOptions,
         protected Output $output,
-        protected string $cliFilePath
+        Connection $connection,
+        CliOptions $cliOptions,
+        string $cliFilePath
     ) {
-        $argsToProcess = $this->cliOptions->parseCliOptions($this->settings, $this->output);
-
-        if (empty($argsToProcess)) {
+        if (empty($cliOptions->getUnprocessedCliArgs())) {
             $this->output
                 ->addLine("Usage: rmate [OPTIONS] filename")
                 ->addLine("See rmate --help for more")
@@ -22,20 +26,14 @@ class Rmate
             return;
         }
 
-        $commands = $this->processCliArgs($argsToProcess);
+        $commands = $this->processCliArgs($cliOptions->getUnprocessedCliArgs());
 
         if (empty($commands)) {
             return;
         }
 
-        $handler = new \Rmate\CommandHandler(
-            new \Rmate\Connection(
-                $this->settings->host,
-                $this->settings->port,
-                $this->settings->unixsocket
-            ),
-            $this->output
-        );
+        // create handler and connection
+        $handler = $this->createCommandHandlerFromConnection($connection);
 
         $handler->setVerbose($this->settings->verbose);
 
@@ -43,18 +41,22 @@ class Rmate
             $handler->connectAndHandleCmds($commands);
         } else {
             // run async, which is really annoying in PHP
-            $cliArgs = $this->cliOptions->getCliArgs();
+            $cliArgs = $cliOptions->getCliArgs();
             // add wait arg so we don't fork bomb ourselves
             array_unshift($cliArgs, '-w');
             $cliArgs = implode(' ', $cliArgs);
 
             $out = [];
-            exec("php {$this->cliFilePath} {$cliArgs} >> /dev/null 2>&1 & echo $!", $out);
+            exec("php {$cliFilePath} {$cliArgs} >> /dev/null 2>&1 & echo $!", $out);
             $pid = (int) $out[0];
             $this->output->addLine("rmate PID: {$pid}")->flush();
         }
     }
 
+    /**
+     * @param  array $argsToProcess
+     * @return array[Command]
+     */
     protected function processCliArgs(array $argsToProcess) : array
     {
         // Parse arguments.
@@ -122,5 +124,14 @@ class Rmate
         }
 
         return $commands;
+    }
+
+    /**
+     * @param  Connection $connection
+     * @return CommandHandler
+     */
+    public function createCommandHandlerFromConnection(Connection $connection) : CommandHandler
+    {
+        return new \Rmate\CommandHandler($connection, $this->output);
     }
 }

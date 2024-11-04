@@ -6,6 +6,8 @@ class CliOptions
 {
     protected $options;
 
+    protected $unprocessedArgs;
+
     protected $defaults = [
         'host' => DEFAULT_HOST,
         'port' => DEFAULT_PORT,
@@ -201,10 +203,18 @@ class CliOptions
     }
 
     /**
-     * @param  Settings $settings
      * @return array
      */
-    public function parseCliOptions(Settings $settings, Output $output) : array
+    public function getUnprocessedCliArgs() : array
+    {
+        return $this->unprocessedArgs;
+    }
+
+    /**
+     * @param  Settings $settings
+     * @return void
+     */
+    public function parseCliOptions(Settings $settings, Output $output) : void
     {
         $i = 0;
         foreach ($this->cliArgs as $i => $arg) {
@@ -236,7 +246,7 @@ class CliOptions
             }
         }
 
-        return array_values(
+        $this->unprocessedArgs = array_values(
             array_slice($this->cliArgs, $i)
         );
     }

@@ -92,3 +92,13 @@ You can run the tests with the following (make sure you `composer install`):
 ```
 make tests
 ```
+
+You can also generate HTML coverage via:
+
+```
+make coverage
+```
+
+This will populate the `coverage/` directory and you can view the `index.html` file in there to look at coverage. Note that code coverage requires [Xdebug](https://xdebug.org/docs/install) or [PCOV](https://github.com/krakjoe/pcov/blob/develop/INSTALL.md).
+
+Running `make clean` will delete the coverage directory.

@@ -2,13 +2,13 @@
 
 namespace Rmate;
 
+// Very basic output buffer
+
 class Output
 {
-    protected $out = [];
-
     /**
      */
-    public function __construct()
+    public function __construct(protected array $out = [])
     {
     }
 
